@@ -170,8 +170,14 @@ exports.addInvestorInterest = async (req, res) => {
       });
     }
 
-    startup.investorsInterested.addToSet(investorId);
-    await startup.save();
+    const alreadyInterested = startup.investorsInterested.some(
+      (id) => id.toString() === investorId.toString()
+    );
+
+    if (!alreadyInterested) {
+      startup.investorsInterested.push(investorId);
+      await startup.save();
+    }
 
     res.json({
       message: "Investor interest added successfully",
