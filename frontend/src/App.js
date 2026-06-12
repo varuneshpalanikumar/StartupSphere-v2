@@ -18,6 +18,7 @@ import FounderInvestorRequests from "./pages/FounderInvestorRequests";
 import MentorStartups from "./pages/MentorStartups";
 import InvestorStartups from "./pages/InvestorStartups";
 import MyJoinRequests from "./pages/MyJoinRequests";
+import Toast from "./components/Toast";
 import "./styles/main.css";
 
 
@@ -25,6 +26,7 @@ import "./styles/main.css";
 function App() {
   return (
     <Router>
+      <Toast />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />

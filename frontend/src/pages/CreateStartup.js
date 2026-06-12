@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../services/api";
+import { showToast } from "../components/Toast";
 import Navbar from "../components/Navbar";
 
 function CreateStartup() {
   const navigate = useNavigate();
-
   const user = JSON.parse(sessionStorage.getItem("user"));
 
   const [form, setForm] = useState({
@@ -17,12 +17,8 @@ function CreateStartup() {
     mentorReviewRequested: false
   });
 
-  const [message, setMessage] = useState("");
-  const [isError, setIsError] = useState(false);
-
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-
     setForm({
       ...form,
       [name]: type === "checkbox" ? checked : value
@@ -33,8 +29,7 @@ function CreateStartup() {
     e.preventDefault();
 
     if (!user || user.role !== "founder") {
-      setIsError(true);
-      setMessage("Only founders can create startups");
+      showToast("Only founders can create startups", "error");
       return;
     }
 
@@ -51,9 +46,7 @@ function CreateStartup() {
 
       const res = await API.post("/startups/create", payload);
 
-      setIsError(false);
-      setMessage("Startup created successfully");
-
+      showToast(res.data.message || "Startup created successfully", "success");
       const startupId = res.data.startup._id;
 
       setTimeout(() => {
@@ -61,12 +54,8 @@ function CreateStartup() {
       }, 1000);
 
     } catch (error) {
-      console.error(error);
-
-      setIsError(true);
-      setMessage(
-        error.response?.data?.message || "Failed to create startup"
-      );
+      const message = error.response?.data?.message || "Failed to create startup";
+      showToast(message, "error");
     }
   };
 
@@ -80,21 +69,6 @@ function CreateStartup() {
           <p className="page-subtitle">
             Publish your startup idea and request the support you need.
           </p>
-
-          {message && (
-            <div
-              style={{
-                marginBottom: "16px",
-                padding: "12px",
-                borderRadius: "10px",
-                background: isError ? "#fee2e2" : "#dcfce7",
-                color: isError ? "#b91c1c" : "#166534",
-                fontWeight: "600"
-              }}
-            >
-              {message}
-            </div>
-          )}
 
           <form onSubmit={handleSubmit}>
             <div className="input-group">

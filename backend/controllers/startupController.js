@@ -1,76 +1,68 @@
 const Startup = require("../models/Startup");
 const Review = require("../models/Review");
 const User = require("../models/User");
+const mongoose = require("mongoose");
+const AppError = require("../utils/AppError");
 
-exports.createStartup = async (req, res) => {
+const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
+
+exports.createStartup = async (req, res, next) => {
   try {
+    const { title, description, founder, fundingRequired, techSupportRequired, mentorshipRequired, mentorReviewRequested } = req.body;
 
-    const {
-      title,
-      description,
-      founder,
-      fundingRequired,
-      techSupportRequired,
-      mentorshipRequired,
-      mentorReviewRequested
-    } = req.body;
+    if (!title || title.trim().length < 3) {
+      throw new AppError("Title must be at least 3 characters", 400, "VALIDATION_ERROR");
+    }
+
+    if (!description || description.trim().length < 10) {
+      throw new AppError("Description must be at least 10 characters", 400, "VALIDATION_ERROR");
+    }
+
+    if (!founder || !isValidObjectId(founder)) {
+      throw new AppError("Invalid founder ID", 400, "VALIDATION_ERROR");
+    }
 
     const startup = new Startup({
       title,
       description,
       founder,
-      fundingRequired,
-      techSupportRequired,
-      mentorshipRequired,
-      mentorReviewRequested
+      fundingRequired: fundingRequired || 0,
+      techSupportRequired: techSupportRequired || false,
+      mentorshipRequired: mentorshipRequired || false,
+      mentorReviewRequested: mentorReviewRequested || false
     });
 
     await startup.save();
-
-    res.status(201).json({
-      message: "Startup created successfully",
-      startup
-    });
+    res.status(201).json({ success: true, message: "Startup created successfully", startup });
 
   } catch (error) {
-
-    res.status(500).json({
-      message: "Error creating startup",
-      error
-    });
-
+    next(error);
   }
 };
-exports.getAllStartups = async (req, res) => {
+
+exports.getAllStartups = async (req, res, next) => {
   try {
-
     const startups = await Startup.find().populate("founder", "name email");
-
-    res.status(200).json(startups);
-
+    res.status(200).json({ success: true, data: startups });
   } catch (error) {
-
-    res.status(500).json({
-      message: "Error fetching startups",
-      error
-    });
-
+    next(error);
   }
 };
-exports.calculateStartupScore = async (req, res) => {
+
+exports.calculateStartupScore = async (req, res, next) => {
   try {
     const { startupId } = req.params;
 
-    const startup = await Startup.findById(startupId);
+    if (!isValidObjectId(startupId)) {
+      throw new AppError("Invalid startup ID", 400, "VALIDATION_ERROR");
+    }
 
+    const startup = await Startup.findById(startupId);
     if (!startup) {
-      return res.status(404).json({
-        message: "Startup not found"
-      });
+      throw new AppError("Startup not found", 404, "NOT_FOUND");
     }
 
     const reviews = await Review.find({ startup: startupId });
-
     let averageRating = 0;
     if (reviews.length > 0) {
       const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
@@ -78,125 +70,97 @@ exports.calculateStartupScore = async (req, res) => {
     }
 
     const progressScore = Math.min(startup.progress / 2, 40);
-
     const reviewScore = Math.min((averageRating / 5) * 30, 30);
-
     const teamScore = Math.min(startup.professionalsJoined.length * 5, 20);
-
     const investorScore = Math.min(startup.investorsInterested.length * 2, 10);
-
-    const finalScore = Math.round(
-      progressScore + reviewScore + teamScore + investorScore
-    );
+    const finalScore = Math.round(progressScore + reviewScore + teamScore + investorScore);
 
     startup.startupScore = finalScore;
     await startup.save();
 
-    res.json({
-      message: "Startup score calculated successfully",
-      startupId: startup._id,
-      progressScore,
-      reviewScore,
-      teamScore,
-      investorScore,
-      finalScore
-    });
+    res.json({ success: true, message: "Score calculated", finalScore });
 
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error calculating startup score",
-      error: error.message
-    });
+    next(error);
   }
 };
-exports.updateStartupProgress = async (req, res) => {
+
+exports.updateStartupProgress = async (req, res, next) => {
   try {
     const { startupId } = req.params;
     const { progress, latestUpdate } = req.body;
 
-    const startup = await Startup.findById(startupId);
+    if (!isValidObjectId(startupId)) {
+      throw new AppError("Invalid startup ID", 400, "VALIDATION_ERROR");
+    }
 
+    if (progress === undefined || progress === null) {
+      throw new AppError("Progress is required", 400, "VALIDATION_ERROR");
+    }
+
+    if (isNaN(progress) || progress < 0 || progress > 100) {
+      throw new AppError("Progress must be between 0 and 100", 400, "VALIDATION_ERROR");
+    }
+
+    const startup = await Startup.findById(startupId);
     if (!startup) {
-      return res.status(404).json({
-        message: "Startup not found"
-      });
+      throw new AppError("Startup not found", 404, "NOT_FOUND");
     }
 
     startup.progress = progress;
-    startup.latestUpdate = latestUpdate;
-
+    if (latestUpdate) startup.latestUpdate = latestUpdate;
     await startup.save();
 
-    res.json({
-      message: "Startup progress updated successfully",
-      startup
-    });
+    res.json({ success: true, message: "Progress updated successfully" });
 
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error updating startup progress",
-      error: error.message
-    });
+    next(error);
   }
 };
-exports.addInvestorInterest = async (req, res) => {
+
+exports.addInvestorInterest = async (req, res, next) => {
   try {
     const { startupId } = req.params;
     const { investorId } = req.body;
 
-    const startup = await Startup.findById(startupId);
+    if (!isValidObjectId(startupId)) {
+      throw new AppError("Invalid startup ID", 400, "VALIDATION_ERROR");
+    }
 
+    if (!investorId || !isValidObjectId(investorId)) {
+      throw new AppError("Invalid investor ID", 400, "VALIDATION_ERROR");
+    }
+
+    const startup = await Startup.findById(startupId);
     if (!startup) {
-      return res.status(404).json({
-        message: "Startup not found"
-      });
+      throw new AppError("Startup not found", 404, "NOT_FOUND");
     }
 
     const investor = await User.findById(investorId);
-
-    if (!investor) {
-      return res.status(404).json({
-        message: "Investor not found"
-      });
+    if (!investor || investor.role !== "investor") {
+      throw new AppError("User is not an investor", 400, "INVALID_USER_ROLE");
     }
 
-    if (investor.role !== "investor") {
-      return res.status(403).json({
-        message: "Only users with investor role can show interest"
-      });
-    }
-
-    const alreadyInterested = startup.investorsInterested.some(
-      (id) => id.toString() === investorId.toString()
-    );
-
+    const alreadyInterested = startup.investorsInterested.some(id => id.toString() === investorId.toString());
     if (!alreadyInterested) {
       startup.investorsInterested.push(investorId);
       await startup.save();
     }
 
-    res.json({
-      message: "Investor interest added successfully",
-      investorsInterested: startup.investorsInterested.length
-    });
+    res.json({ success: true, message: "Interest added successfully" });
 
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error adding investor interest",
-      error: error.message
-    });
+    next(error);
   }
 };
-exports.getStartupDetails = async (req, res) => {
-  try {
 
+exports.getStartupDetails = async (req, res, next) => {
+  try {
     const { startupId } = req.params;
+
+    if (!isValidObjectId(startupId)) {
+      throw new AppError("Invalid startup ID", 400, "VALIDATION_ERROR");
+    }
 
     const startup = await Startup.findById(startupId)
       .populate("founder", "name email role portfolio verified")
@@ -205,143 +169,104 @@ exports.getStartupDetails = async (req, res) => {
       .populate("investorsInterested", "name email role portfolio verified");
 
     if (!startup) {
-      return res.status(404).json({
-        message: "Startup not found"
-      });
+      throw new AppError("Startup not found", 404, "NOT_FOUND");
     }
 
-    const reviews = await Review.find({ startup: startupId })
-      .populate("mentor", "name email");
-
-    res.json({
-      startup,
-      reviews,
-      investorCount: startup.investorsInterested.length,
-      teamSize: startup.professionalsJoined.length
-    });
+    const reviews = await Review.find({ startup: startupId }).populate("mentor", "name email");
+    res.json({ success: true, startup, reviews });
 
   } catch (error) {
-
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error fetching startup details",
-      error: error.message
-    });
-
+    next(error);
   }
 };
-exports.searchStartups = async (req, res) => {
-  try {
-    const {
-      techSupportRequired,
-      mentorshipRequired,
-      mentorReviewRequested,
-      minScore,
-      minProgress,
-      title
-    } = req.query;
 
+exports.searchStartups = async (req, res, next) => {
+  try {
+    const { techSupportRequired, mentorshipRequired, mentorReviewRequested, minScore, minProgress, title } = req.query;
     let filter = {};
 
     if (techSupportRequired !== undefined) {
       filter.techSupportRequired = techSupportRequired === "true";
     }
-
     if (mentorshipRequired !== undefined) {
       filter.mentorshipRequired = mentorshipRequired === "true";
     }
-
     if (mentorReviewRequested !== undefined) {
       filter.mentorReviewRequested = mentorReviewRequested === "true";
     }
-
     if (minScore !== undefined) {
+      if (isNaN(minScore)) {
+        throw new AppError("Min score must be a number", 400, "VALIDATION_ERROR");
+      }
       filter.startupScore = { $gte: Number(minScore) };
     }
-
     if (minProgress !== undefined) {
+      if (isNaN(minProgress)) {
+        throw new AppError("Min progress must be a number", 400, "VALIDATION_ERROR");
+      }
       filter.progress = { $gte: Number(minProgress) };
     }
-
     if (title) {
       filter.title = { $regex: title, $options: "i" };
     }
 
-    const startups = await Startup.find(filter)
-      .populate("founder", "name email")
-      .select("-__v");
-
-    res.json(startups);
+    const startups = await Startup.find(filter).populate("founder", "name email");
+    res.json({ success: true, data: startups });
 
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error searching startups",
-      error: error.message
-    });
+    next(error);
   }
 };
-exports.getFounderStartups = async (req, res) => {
 
+exports.getFounderStartups = async (req, res, next) => {
   try {
+    const { founderId } = req.params;
 
-    const startups = await Startup.find({
-      founder: req.params.founderId
-    }).populate("founder", "name email");
+    if (!isValidObjectId(founderId)) {
+      throw new AppError("Invalid founder ID", 400, "VALIDATION_ERROR");
+    }
 
-    res.json(startups);
+    const startups = await Startup.find({ founder: founderId }).populate("founder", "name email");
+    res.json({ success: true, data: startups });
 
   } catch (error) {
-
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error fetching founder startups",
-      error: error.message
-    });
-
+    next(error);
   }
-
 };
-exports.getMentorStartups = async (req, res) => {
+
+exports.getMentorStartups = async (req, res, next) => {
   try {
-    const startups = await Startup.find({
-      mentorsJoined: req.params.mentorId
-    })
+    const { mentorId } = req.params;
+
+    if (!isValidObjectId(mentorId)) {
+      throw new AppError("Invalid mentor ID", 400, "VALIDATION_ERROR");
+    }
+
+    const startups = await Startup.find({ mentorsJoined: mentorId })
       .populate("founder", "name email")
       .populate("mentorsJoined", "name email role");
 
-    res.json(startups);
+    res.json({ success: true, data: startups });
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error fetching mentor startups",
-      error: error.message
-    });
+    next(error);
   }
 };
-exports.getInvestorStartups = async (req, res) => {
-  try {
 
-    const startups = await Startup.find({
-      investorsInterested: req.params.investorId
-    })
+exports.getInvestorStartups = async (req, res, next) => {
+  try {
+    const { investorId } = req.params;
+
+    if (!isValidObjectId(investorId)) {
+      throw new AppError("Invalid investor ID", 400, "VALIDATION_ERROR");
+    }
+
+    const startups = await Startup.find({ investorsInterested: investorId })
       .populate("founder", "name email")
       .populate("investorsInterested", "name email role");
 
-    res.json(startups);
+    res.json({ success: true, data: startups });
 
   } catch (error) {
-
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error fetching investor startups",
-      error: error.message
-    });
-
+    next(error);
   }
 };

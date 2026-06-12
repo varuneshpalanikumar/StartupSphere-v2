@@ -2,6 +2,8 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/db");
+const logger = require("./middleware/logger");
+const errorHandler = require("./middleware/errorHandler");
 
 const authRoutes = require("./routes/authRoutes");
 const startupRoutes = require("./routes/startupRoutes");
@@ -19,6 +21,7 @@ connectDB();
 
 app.use(cors());
 app.use(express.json());
+app.use(logger);
 app.use("/api/auth", authRoutes);
 app.use("/api/startups", startupRoutes);
 app.use("/api/reviews", reviewRoutes);
@@ -30,6 +33,8 @@ app.use("/api/investor-requests", investorRequestRoutes);
 app.get("/", (req, res) => {
   res.send("StartupSphere API Running");
 });
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT;
 

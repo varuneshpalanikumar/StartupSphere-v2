@@ -1,21 +1,39 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const AppError = require("../utils/AppError");
 
-exports.signup = async (req, res) => {
+const validateEmail = (email) => {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(email);
+};
+
+exports.signup = async (req, res, next) => {
   try {
     const { name, email, password, role, skills, portfolio, bio } = req.body;
 
-    const userExists = await User.findOne({ email });
+    if (!name || name.trim().length < 2) {
+      throw new AppError("Name must be at least 2 characters", 400, "VALIDATION_ERROR");
+    }
 
+    if (!email || !validateEmail(email)) {
+      throw new AppError("Invalid email format", 400, "VALIDATION_ERROR");
+    }
+
+    if (!password || password.length < 6) {
+      throw new AppError("Password must be at least 6 characters", 400, "VALIDATION_ERROR");
+    }
+
+    if (!role || !["founder", "professional", "mentor", "investor"].includes(role)) {
+      throw new AppError("Invalid role", 400, "VALIDATION_ERROR");
+    }
+
+    const userExists = await User.findOne({ email });
     if (userExists) {
-      return res.status(400).json({
-        message: "User already exists"
-      });
+      throw new AppError("Email already exists", 409, "DUPLICATE_EMAIL");
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const user = new User({
       name,
       email,
@@ -27,37 +45,33 @@ exports.signup = async (req, res) => {
     });
 
     await user.save();
-
-    res.status(201).json({
-      message: "User created successfully"
-    });
+    res.status(201).json({ success: true, message: "Account created successfully" });
 
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Signup error",
-      error: error.message
-    });
+    next(error);
   }
 };
 
-
-exports.login = async (req, res) => {
+exports.login = async (req, res, next) => {
   try {
-
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    if (!email || !validateEmail(email)) {
+      throw new AppError("Invalid email format", 400, "VALIDATION_ERROR");
+    }
 
+    if (!password) {
+      throw new AppError("Password is required", 400, "VALIDATION_ERROR");
+    }
+
+    const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      throw new AppError("Invalid email or password", 401, "INVALID_CREDENTIALS");
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
-
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      throw new AppError("Invalid email or password", 401, "INVALID_CREDENTIALS");
     }
 
     const token = jwt.sign(
@@ -67,14 +81,11 @@ exports.login = async (req, res) => {
     );
 
     const userObj = user.toObject ? user.toObject() : user;
-    if (userObj.password) delete userObj.password;
+    delete userObj.password;
 
-    res.json({
-      token,
-      user: userObj
-    });
+    res.json({ success: true, message: "Login successful", token, user: userObj });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };

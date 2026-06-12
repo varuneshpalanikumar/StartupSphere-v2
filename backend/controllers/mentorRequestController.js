@@ -1,27 +1,22 @@
 const MentorRequest = require("../models/MentorRequest");
 const User = require("../models/User");
 const Startup = require("../models/Startup");
+const AppError = require("../utils/AppError");
 
-
-
-exports.createMentorRequest = async (req, res) => {
+exports.createMentorRequest = async (req, res, next) => {
   try {
     const { startupId, founderId, mentorId, requestType, message } = req.body;
 
     const startup = await Startup.findById(startupId);
 
     if (!startup) {
-      return res.status(404).json({
-        message: "Startup not found"
-      });
+      throw new AppError("Startup not found", 404, "NOT_FOUND");
     }
 
     const mentor = await User.findById(mentorId);
 
     if (!mentor || mentor.role !== "mentor") {
-      return res.status(404).json({
-        message: "Mentor not found"
-      });
+      throw new AppError("Mentor not found", 404, "NOT_FOUND");
     }
 
     const existingRequest = await MentorRequest.findOne({
@@ -31,9 +26,7 @@ exports.createMentorRequest = async (req, res) => {
     });
 
     if (existingRequest) {
-      return res.status(400).json({
-        message: "This request has already been sent to this mentor for this startup"
-      });
+      throw new AppError("This request has already been sent to this mentor for this startup", 400, "DUPLICATE_REQUEST");
     }
 
     const newRequest = new MentorRequest({
@@ -47,22 +40,17 @@ exports.createMentorRequest = async (req, res) => {
     await newRequest.save();
 
     res.status(201).json({
+      success: true,
       message: "Mentor request created successfully",
       request: newRequest
     });
 
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error creating mentor request",
-      error: error.message
-    });
+    next(error);
   }
 };
 
-// mentor views requests sent to them
-exports.getRequestsForMentor = async (req, res) => {
+exports.getRequestsForMentor = async (req, res, next) => {
   try {
     const requests = await MentorRequest.find({
       mentor: req.params.mentorId,
@@ -72,18 +60,13 @@ exports.getRequestsForMentor = async (req, res) => {
       .populate("founder", "name email")
       .populate("mentor", "name email verified");
 
-    res.json(requests);
+    res.json({ success: true, data: requests });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Error fetching mentor requests",
-      error: error.message
-    });
+    next(error);
   }
 };
 
-// founder views requests created by them
-exports.getRequestsForFounder = async (req, res) => {
+exports.getRequestsForFounder = async (req, res, next) => {
   try {
     const requests = await MentorRequest.find({
       founder: req.params.founderId
@@ -91,28 +74,23 @@ exports.getRequestsForFounder = async (req, res) => {
       .populate("startup", "title")
       .populate("mentor", "name email verified");
 
-    res.json(requests);
+    res.json({ success: true, data: requests });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Error fetching founder mentor requests",
-      error: error.message
-    });
+    next(error);
   }
 };
 
-exports.acceptMentorRequest = async (req, res) => {
+exports.acceptMentorRequest = async (req, res, next) => {
   try {
     const request = await MentorRequest.findById(req.params.requestId);
 
     if (!request) {
-      return res.status(404).json({ message: "Mentor request not found" });
+      throw new AppError("Mentor request not found", 404, "NOT_FOUND");
     }
 
     request.status = "accepted";
     await request.save();
 
-    // if mentorship accepted, add mentor to startup mentorsJoined
     if (request.requestType === "mentorship") {
       await Startup.findByIdAndUpdate(
         request.startup,
@@ -121,37 +99,32 @@ exports.acceptMentorRequest = async (req, res) => {
     }
 
     res.json({
+      success: true,
       message: "Mentor request accepted",
       requestType: request.requestType,
       startupId: request.startup
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Error accepting mentor request",
-      error: error.message
-    });
+    next(error);
   }
 };
 
-// mentor rejects request
-exports.rejectMentorRequest = async (req, res) => {
+exports.rejectMentorRequest = async (req, res, next) => {
   try {
     const request = await MentorRequest.findById(req.params.requestId);
 
     if (!request) {
-      return res.status(404).json({ message: "Mentor request not found" });
+      throw new AppError("Mentor request not found", 404, "NOT_FOUND");
     }
 
     request.status = "rejected";
     await request.save();
 
-    res.json({ message: "Mentor request rejected" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Error rejecting mentor request",
-      error: error.message
+    res.json({
+      success: true,
+      message: "Mentor request rejected"
     });
+  } catch (error) {
+    next(error);
   }
 };

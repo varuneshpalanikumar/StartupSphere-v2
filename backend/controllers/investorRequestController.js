@@ -1,26 +1,22 @@
 const InvestorRequest = require("../models/InvestorRequest");
 const User = require("../models/User");
 const Startup = require("../models/Startup");
+const AppError = require("../utils/AppError");
 
-// founder sends funding request to investor
-exports.createInvestorRequest = async (req, res) => {
+exports.createInvestorRequest = async (req, res, next) => {
   try {
     const { startupId, founderId, investorId, message } = req.body;
 
     const startup = await Startup.findById(startupId);
 
     if (!startup) {
-      return res.status(404).json({
-        message: "Startup not found"
-      });
+      throw new AppError("Startup not found", 404, "NOT_FOUND");
     }
 
     const investor = await User.findById(investorId);
 
     if (!investor || investor.role !== "investor") {
-      return res.status(404).json({
-        message: "Investor not found"
-      });
+      throw new AppError("Investor not found", 404, "NOT_FOUND");
     }
 
     const existingRequest = await InvestorRequest.findOne({
@@ -30,9 +26,7 @@ exports.createInvestorRequest = async (req, res) => {
     });
 
     if (existingRequest) {
-      return res.status(400).json({
-        message: "Funding request already exists for this investor and startup"
-      });
+      throw new AppError("Funding request already exists for this investor and startup", 400, "DUPLICATE_REQUEST");
     }
 
     const newRequest = new InvestorRequest({
@@ -47,38 +41,29 @@ exports.createInvestorRequest = async (req, res) => {
     await newRequest.save();
 
     res.status(201).json({
+      success: true,
       message: "Funding request sent successfully",
       request: newRequest
     });
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error creating investor request",
-      error: error.message
-    });
+    next(error);
   }
 };
 
-// investor shows interest in startup
-exports.investorShowInterest = async (req, res) => {
+exports.investorShowInterest = async (req, res, next) => {
   try {
     const { startupId, investorId, message } = req.body;
 
     const startup = await Startup.findById(startupId);
 
     if (!startup) {
-      return res.status(404).json({
-        message: "Startup not found"
-      });
+      throw new AppError("Startup not found", 404, "NOT_FOUND");
     }
 
     const investor = await User.findById(investorId);
 
     if (!investor || investor.role !== "investor") {
-      return res.status(404).json({
-        message: "Investor not found"
-      });
+      throw new AppError("Investor not found", 404, "NOT_FOUND");
     }
 
     const existingRequest = await InvestorRequest.findOne({
@@ -88,9 +73,7 @@ exports.investorShowInterest = async (req, res) => {
     });
 
     if (existingRequest) {
-      return res.status(400).json({
-        message: "Interest/request already exists for this startup"
-      });
+      throw new AppError("Interest/request already exists for this startup", 400, "DUPLICATE_REQUEST");
     }
 
     const newRequest = new InvestorRequest({
@@ -105,21 +88,16 @@ exports.investorShowInterest = async (req, res) => {
     await newRequest.save();
 
     res.status(201).json({
+      success: true,
       message: "Interest sent successfully",
       request: newRequest
     });
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error showing investor interest",
-      error: error.message
-    });
+    next(error);
   }
 };
 
-// investor views pending requests sent to them by founders
-exports.getRequestsForInvestor = async (req, res) => {
+exports.getRequestsForInvestor = async (req, res, next) => {
   try {
     const requests = await InvestorRequest.find({
       investor: req.params.investorId,
@@ -130,19 +108,13 @@ exports.getRequestsForInvestor = async (req, res) => {
       .populate("founder", "name email")
       .populate("investor", "name email");
 
-    res.json(requests);
+    res.json({ success: true, data: requests });
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error fetching investor requests",
-      error: error.message
-    });
+    next(error);
   }
 };
 
-// founder views all investor-related requests for their startups
-exports.getRequestsForFounder = async (req, res) => {
+exports.getRequestsForFounder = async (req, res, next) => {
   try {
     const requests = await InvestorRequest.find({
       founder: req.params.founderId
@@ -151,40 +123,29 @@ exports.getRequestsForFounder = async (req, res) => {
       .populate("investor", "name email")
       .sort({ createdAt: -1 });
 
-    res.json(requests);
+    res.json({ success: true, data: requests });
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error fetching founder investor requests",
-      error: error.message
-    });
+    next(error);
   }
 };
 
-// accept request
-// if founder initiated -> investor accepts and investor gets added
-// if investor initiated -> founder accepts and investor gets added
-exports.acceptInvestorRequest = async (req, res) => {
+exports.acceptInvestorRequest = async (req, res, next) => {
   try {
     const request = await InvestorRequest.findById(req.params.requestId);
 
     if (!request) {
-      return res.status(404).json({
-        message: "Investor request not found"
-      });
+      throw new AppError("Investor request not found", 404, "NOT_FOUND");
     }
 
     if (request.status === "accepted") {
       return res.json({
+        success: true,
         message: "Request already accepted"
       });
     }
 
     if (request.status === "rejected") {
-      return res.status(400).json({
-        message: "Rejected request cannot be accepted"
-      });
+      throw new AppError("Rejected request cannot be accepted", 400, "INVALID_STATE");
     }
 
     request.status = "accepted";
@@ -195,41 +156,30 @@ exports.acceptInvestorRequest = async (req, res) => {
     });
 
     res.json({
+      success: true,
       message: "Investor successfully added to project"
     });
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error accepting investor request",
-      error: error.message
-    });
+    next(error);
   }
 };
 
-// reject request
-exports.rejectInvestorRequest = async (req, res) => {
+exports.rejectInvestorRequest = async (req, res, next) => {
   try {
     const request = await InvestorRequest.findById(req.params.requestId);
 
     if (!request) {
-      return res.status(404).json({
-        message: "Investor request not found"
-      });
+      throw new AppError("Investor request not found", 404, "NOT_FOUND");
     }
 
     request.status = "rejected";
     await request.save();
 
     res.json({
+      success: true,
       message: "Funding request rejected"
     });
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error rejecting investor request",
-      error: error.message
-    });
+    next(error);
   }
 };

@@ -1,6 +1,7 @@
 const User = require("../models/User");
+const AppError = require("../utils/AppError");
 
-exports.searchUsers = async (req, res) => {
+exports.searchUsers = async (req, res, next) => {
   try {
     const { role, verified, skill, name } = req.query;
 
@@ -24,18 +25,14 @@ exports.searchUsers = async (req, res) => {
 
     const users = await User.find(filter).select("-password");
 
-    res.json(users);
+    res.json({ success: true, data: users });
 
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error searching users",
-      error: error.message
-    });
+    next(error);
   }
 };
-exports.getJoinedProjects = async (req, res) => {
+
+exports.getJoinedProjects = async (req, res, next) => {
 
   try {
 
@@ -43,22 +40,13 @@ exports.getJoinedProjects = async (req, res) => {
       .populate("joinedProjects");
 
     if (!user) {
-      return res.status(404).json({
-        message: "User not found"
-      });
+      throw new AppError("User not found", 404, "NOT_FOUND");
     }
 
-    res.json(user.joinedProjects);
+    res.json({ success: true, data: user.joinedProjects });
 
   } catch (error) {
-
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error fetching joined projects",
-      error: error.message
-    });
-
+    next(error);
   }
 
 };

@@ -1,18 +1,16 @@
 const JoinRequest = require("../models/JoinRequest");
 const Startup = require("../models/Startup");
 const User = require("../models/User");
+const AppError = require("../utils/AppError");
 
-// PROFESSIONAL SENDS JOIN REQUEST
-exports.createJoinRequest = async (req, res) => {
+exports.createJoinRequest = async (req, res, next) => {
   try {
     const { startupId, professionalId, message } = req.body;
 
     const startup = await Startup.findById(startupId);
 
     if (!startup) {
-      return res.status(404).json({
-        message: "Startup not found"
-      });
+      throw new AppError("Startup not found", 404, "NOT_FOUND");
     }
 
     const existingRequest = await JoinRequest.findOne({
@@ -21,9 +19,7 @@ exports.createJoinRequest = async (req, res) => {
     });
 
     if (existingRequest) {
-      return res.status(400).json({
-        message: "You already sent a join request for this startup"
-      });
+      throw new AppError("You already sent a join request for this startup", 400, "DUPLICATE_REQUEST");
     }
 
     const newRequest = new JoinRequest({
@@ -35,53 +31,41 @@ exports.createJoinRequest = async (req, res) => {
     await newRequest.save();
 
     res.status(201).json({
+      success: true,
       message: "Join request sent successfully",
       request: newRequest
     });
 
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error sending request",
-      error: error.message
-    });
+    next(error);
   }
 };
 
-// GET PENDING JOIN REQUESTS FOR A STARTUP
-exports.getStartupJoinRequests = async (req, res) => {
+exports.getStartupJoinRequests = async (req, res, next) => {
   try {
     const requests = await JoinRequest.find({
       startup: req.params.startupId,
       status: "pending"
     }).populate("professional", "name email verified");
 
-    res.json(requests);
+    res.json({ success: true, data: requests });
 
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error fetching requests",
-      error: error.message
-    });
+    next(error);
   }
 };
 
-// FOUNDER ACCEPTS REQUEST
-exports.acceptJoinRequest = async (req, res) => {
+exports.acceptJoinRequest = async (req, res, next) => {
   try {
     const request = await JoinRequest.findById(req.params.requestId);
 
     if (!request) {
-      return res.status(404).json({
-        message: "Request not found"
-      });
+      throw new AppError("Request not found", 404, "NOT_FOUND");
     }
 
     if (request.status === "accepted") {
       return res.json({
+        success: true,
         message: "Request already accepted"
       });
     }
@@ -104,90 +88,66 @@ exports.acceptJoinRequest = async (req, res) => {
     );
 
     res.json({
+      success: true,
       message: "Professional successfully added to startup team"
     });
 
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error accepting request",
-      error: error.message
-    });
+    next(error);
   }
 };
 
-// FOUNDER REJECTS REQUEST
-exports.rejectJoinRequest = async (req, res) => {
+exports.rejectJoinRequest = async (req, res, next) => {
   try {
     const request = await JoinRequest.findById(req.params.requestId);
 
     if (!request) {
-      return res.status(404).json({
-        message: "Request not found"
-      });
+      throw new AppError("Request not found", 404, "NOT_FOUND");
     }
 
     request.status = "rejected";
     await request.save();
 
     res.json({
+      success: true,
       message: "Request rejected"
     });
 
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error rejecting request",
-      error: error.message
-    });
+    next(error);
   }
 };
 
-// VERIFIED PROFESSIONAL VOTES
-exports.voteJoinRequest = async (req, res) => {
+exports.voteJoinRequest = async (req, res, next) => {
   try {
     const { voterId, voteType } = req.body;
 
     const voter = await User.findById(voterId);
 
     if (!voter) {
-      return res.status(404).json({
-        message: "Voter not found"
-      });
+      throw new AppError("Voter not found", 404, "NOT_FOUND");
     }
 
     if (voter.role !== "professional") {
-      return res.status(403).json({
-        message: "Only professionals can vote"
-      });
+      throw new AppError("Only professionals can vote", 403, "FORBIDDEN");
     }
 
     if (voter.verified !== true) {
-      return res.status(403).json({
-        message: "Only verified professionals can vote"
-      });
+      throw new AppError("Only verified professionals can vote", 403, "FORBIDDEN");
     }
 
     const request = await JoinRequest.findById(req.params.requestId);
 
     if (!request) {
-      return res.status(404).json({
-        message: "Join request not found"
-      });
+      throw new AppError("Join request not found", 404, "NOT_FOUND");
     }
 
     if (request.status !== "pending") {
-      return res.status(400).json({
-        message: "Voting allowed only for pending requests"
-      });
+      throw new AppError("Voting allowed only for pending requests", 400, "INVALID_STATE");
     }
 
     if (voteType !== "up" && voteType !== "down") {
-      return res.status(400).json({
-        message: "voteType must be 'up' or 'down'"
-      });
+      throw new AppError("voteType must be 'up' or 'down'", 400, "VALIDATION_ERROR");
     }
 
     if (!request.votes) {
@@ -200,6 +160,7 @@ exports.voteJoinRequest = async (req, res) => {
 
     if (existingVote && existingVote.voteType === voteType) {
       return res.json({
+        success: true,
         message: "Vote already recorded",
         upVotes: request.upVotes,
         downVotes: request.downVotes
@@ -226,23 +187,18 @@ exports.voteJoinRequest = async (req, res) => {
     await request.save();
 
     res.json({
+      success: true,
       message: "Vote recorded successfully",
       upVotes: request.upVotes,
       downVotes: request.downVotes
     });
 
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error recording vote",
-      error: error.message
-    });
+    next(error);
   }
 };
 
-// PROFESSIONAL VIEWS REQUESTS SENT BY THEM
-exports.getProfessionalJoinRequests = async (req, res) => {
+exports.getProfessionalJoinRequests = async (req, res, next) => {
   try {
     const requests = await JoinRequest.find({
       professional: req.params.professionalId
@@ -250,18 +206,14 @@ exports.getProfessionalJoinRequests = async (req, res) => {
       .populate("startup", "title description progress startupScore")
       .populate("professional", "name email");
 
-    res.json(requests);
+    res.json({ success: true, data: requests });
 
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error fetching professional join requests",
-      error: error.message
-    });
+    next(error);
   }
 };
-exports.getProfessionalRequestStatus = async (req, res) => {
+
+exports.getProfessionalRequestStatus = async (req, res, next) => {
   try {
 
     const { startupId, professionalId } = req.params;
@@ -272,18 +224,12 @@ exports.getProfessionalRequestStatus = async (req, res) => {
     });
 
     if (!request) {
-      return res.json({ status: "none" });
+      return res.json({ success: true, status: "none" });
     }
 
-    res.json({ status: request.status });
+    res.json({ success: true, status: request.status });
 
   } catch (error) {
-
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error checking request status"
-    });
-
+    next(error);
   }
 };

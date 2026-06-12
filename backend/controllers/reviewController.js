@@ -1,24 +1,19 @@
 const Review = require("../models/Review");
 const Startup = require("../models/Startup");
+const AppError = require("../utils/AppError");
 
-exports.addReview = async (req, res) => {
+exports.addReview = async (req, res, next) => {
   try {
     const { startupId, mentorId, rating, comment } = req.body;
 
     const startup = await Startup.findById(startupId);
 
     if (!startup) {
-      return res.status(404).json({
-        success: false,
-        message: "Startup not found"
-      });
+      throw new AppError("Startup not found", 404, "NOT_FOUND");
     }
 
     if (!startup.mentorReviewRequested) {
-      return res.status(403).json({
-        success: false,
-        message: "Mentor review not requested for this startup"
-      });
+      throw new AppError("Mentor review not requested for this startup", 403, "FORBIDDEN");
     }
 
     const existingReview = await Review.findOne({
@@ -27,10 +22,7 @@ exports.addReview = async (req, res) => {
     });
 
     if (existingReview) {
-      return res.status(400).json({
-        success: false,
-        message: "You have already submitted a review for this startup"
-      });
+      throw new AppError("You have already submitted a review for this startup", 400, "DUPLICATE_REVIEW");
     }
 
     const review = new Review({
@@ -48,17 +40,11 @@ exports.addReview = async (req, res) => {
       review
     });
   } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Error submitting review",
-      error: error.message
-    });
+    next(error);
   }
 };
 
-exports.getStartupReviews = async (req, res) => {
+exports.getStartupReviews = async (req, res, next) => {
   try {
     const { startupId } = req.params;
 
@@ -70,12 +56,6 @@ exports.getStartupReviews = async (req, res) => {
       reviews
     });
   } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Error fetching reviews",
-      error: error.message
-    });
+    next(error);
   }
 };
