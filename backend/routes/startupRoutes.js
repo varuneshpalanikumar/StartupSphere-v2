@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const authMiddleware = require("../middleware/authMiddleware");
+
 const {
   createStartup,
   getAllStartups,
@@ -13,24 +15,24 @@ const {
   getInvestorStartups
 } = require("../controllers/startupController");
 
-router.post("/create", createStartup);
+router.post("/create", authMiddleware, createStartup);
 
 router.get("/all", getAllStartups);
 
 router.get("/score/:startupId", calculateStartupScore);
 
-router.put("/progress/:startupId", updateStartupProgress);
+router.put("/progress/:startupId", authMiddleware, updateStartupProgress);
 
-router.put("/invest/:startupId", addInvestorInterest);
+router.put("/invest/:startupId", authMiddleware, addInvestorInterest);
 
 router.get("/details/:startupId", getStartupDetails);
 
 router.get("/search", searchStartups);
 
-router.get("/founder/:founderId", getFounderStartups);
+router.get("/founder/:founderId", authMiddleware, getFounderStartups);
 
-router.get("/mentor/:mentorId", getMentorStartups);
+router.get("/mentor/:mentorId", authMiddleware, getMentorStartups);
 
-router.get("/investor/:investorId", getInvestorStartups);
+router.get("/investor/:investorId", authMiddleware, getInvestorStartups);
 
 module.exports = router;

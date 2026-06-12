@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const authMiddleware = require("../middleware/authMiddleware");
 
 const {
   createInvestorRequest,
@@ -10,13 +11,13 @@ const {
   rejectInvestorRequest
 } = require("../controllers/investorRequestController");
 
-router.post("/", createInvestorRequest);
-router.post("/interest", investorShowInterest);
+router.post("/", authMiddleware, createInvestorRequest);
+router.post("/interest", authMiddleware, investorShowInterest);
 
-router.get("/investor/:investorId", getRequestsForInvestor);
-router.get("/founder/:founderId", getRequestsForFounder);
+router.get("/investor/:investorId", authMiddleware, getRequestsForInvestor);
+router.get("/founder/:founderId", authMiddleware, getRequestsForFounder);
 
-router.put("/accept/:requestId", acceptInvestorRequest);
-router.put("/reject/:requestId", rejectInvestorRequest);
+router.put("/accept/:requestId", authMiddleware, acceptInvestorRequest);
+router.put("/reject/:requestId", authMiddleware, rejectInvestorRequest);
 
 module.exports = router;

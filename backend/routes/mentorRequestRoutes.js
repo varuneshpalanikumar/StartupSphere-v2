@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const authMiddleware = require("../middleware/authMiddleware");
 
 const {
   createMentorRequest,
@@ -9,12 +10,12 @@ const {
   rejectMentorRequest
 } = require("../controllers/mentorRequestController");
 
-router.post("/", createMentorRequest);
+router.post("/", authMiddleware, createMentorRequest);
 
-router.get("/mentor/:mentorId", getRequestsForMentor);
-router.get("/founder/:founderId", getRequestsForFounder);
+router.get("/mentor/:mentorId", authMiddleware, getRequestsForMentor);
+router.get("/founder/:founderId", authMiddleware, getRequestsForFounder);
 
-router.put("/accept/:requestId", acceptMentorRequest);
-router.put("/reject/:requestId", rejectMentorRequest);
+router.put("/accept/:requestId", authMiddleware, acceptMentorRequest);
+router.put("/reject/:requestId", authMiddleware, rejectMentorRequest);
 
 module.exports = router;
