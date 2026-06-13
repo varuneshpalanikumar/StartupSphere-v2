@@ -5,6 +5,7 @@ import './StartupEvaluationDashboard.css';
 const StartupEvaluationDashboard = ({ startupId }) => {
   const [evaluation, setEvaluation] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -14,6 +15,7 @@ const StartupEvaluationDashboard = ({ startupId }) => {
   const fetchEvaluation = async () => {
     try {
       setLoading(true);
+      setError('');
       const res = await API.get(`/ai/evaluation/${startupId}`);
       if (res.data && res.data.data) {
         setEvaluation(res.data.data);
@@ -24,10 +26,35 @@ const StartupEvaluationDashboard = ({ startupId }) => {
       if (err.response && err.response.status === 404) {
         setEvaluation(null);
       } else {
-        setError('Could not load evaluation. Please generate an evaluation first.');
+        setError('Could not load evaluation. Please check your network or try again.');
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleReevaluate = async () => {
+    try {
+      setGenerating(true);
+      setError('');
+      const res = await API.post(`/ai/evaluate/${startupId}`);
+      if (res.data && res.data.data) {
+         setEvaluation(res.data.data);
+      }
+    } catch (err) {
+      if (err.response?.status === 429) {
+        setError('Quota exceeded. Please try again later.');
+      } else if (err.response?.status === 503) {
+        setError('AI service is currently unavailable. Please try again later.');
+      } else if (err.response?.status >= 500) {
+         setError('Server error occurred. Please try again.');
+      } else if (!err.response) {
+         setError('Network error. Please check your connection.');
+      } else {
+         setError(err.response?.data?.message || 'Error generating evaluation.');
+      }
+    } finally {
+      setGenerating(false);
     }
   };
 
@@ -38,6 +65,7 @@ const StartupEvaluationDashboard = ({ startupId }) => {
   };
 
   if (loading) return <div className="loading-state">Loading evaluation...</div>;
+  if (generating) return <div className="loading-state">Generating evaluation...</div>;
   if (error) return <div className="error-message">{error}</div>;
   if (!evaluation) return (
     <div className="empty-state">
@@ -48,9 +76,14 @@ const StartupEvaluationDashboard = ({ startupId }) => {
 
   return (
     <div className="evaluation-dashboard">
-      <div className="dashboard-header">
-        <h2>AI Evaluation Dashboard</h2>
-        <p>Comprehensive analysis of your startup's potential</p>
+      <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2>AI Evaluation Dashboard</h2>
+          <p>Comprehensive analysis of your startup's potential</p>
+        </div>
+        <button className="btn btn-primary" onClick={handleReevaluate} disabled={generating}>
+          Re-evaluate Startup
+        </button>
       </div>
 
       <div className="score-cards">

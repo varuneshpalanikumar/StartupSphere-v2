@@ -32,13 +32,16 @@ function StartupPortfolio() {
 
   const [selectedUser, setSelectedUser] = useState(null);
 
+  const [evaluation, setEvaluation] = useState(undefined);
+  const [evalLoading, setEvalLoading] = useState(false);
+
   useEffect(() => {
     const storedUser = JSON.parse(sessionStorage.getItem("user"));
     if (storedUser) {
       setUser(storedUser);
     }
 
-    fetchStartupDetails();
+    fetchStartupDetails(storedUser);
   }, [id]);
 
   const showMessage = (text, error = false) => {
@@ -50,13 +53,13 @@ function StartupPortfolio() {
     }, 2000);
   };
 
-  const fetchStartupDetails = async () => {
+  const fetchStartupDetails = async (currentUser = user) => {
     try {
-      if (user?.role === "professional") {
+      if (currentUser?.role === "professional") {
         try {
 
           const res = await API.get(
-            `/join-requests/status/${id}/${user._id}`
+            `/join-requests/status/${id}/${currentUser._id}`
           );
 
           setJoinStatus(res.data.status);
@@ -67,6 +70,19 @@ function StartupPortfolio() {
 }
       const res = await API.get(`/startups/details/${id}`);
       setData(res.data);
+
+      const isOwner = currentUser?.role === "founder" && res.data.startup.founder?._id === currentUser?._id;
+      if (isOwner) {
+        try {
+          setEvalLoading(true);
+          const evalRes = await API.get(`/ai/evaluation/${id}`);
+          setEvaluation(evalRes.data.data);
+        } catch (error) {
+          setEvaluation(null);
+        } finally {
+          setEvalLoading(false);
+        }
+      }
 
       setProgressForm({
         progress: "",
@@ -356,6 +372,31 @@ function StartupPortfolio() {
             <p className="muted">No investors linked yet.</p>
           )}
         </div>
+
+        {isStartupOwner && (
+          <div className="card clickable-card" style={{ marginBottom: "24px", borderLeft: '4px solid #007bff' }}>
+            <h3 className="section-title">AI Evaluation Summary</h3>
+            {evalLoading ? (
+              <p>Loading AI evaluation...</p>
+            ) : evaluation ? (
+              <>
+                <p style={{ marginBottom: '8px' }}><strong>AI Score:</strong> <span className="badge" style={{ background: '#007bff', color: 'white', padding: '4px 8px', borderRadius: '12px' }}>{Math.round(evaluation.aiScore)}/100</span></p>
+                <p style={{ marginBottom: '8px' }}><strong>Funding Readiness:</strong> {evaluation.fundingReadiness}</p>
+                <p style={{ marginBottom: '16px' }}><strong>Investment Verdict:</strong> {evaluation.investmentVerdict}</p>
+                <Link to={`/startup/${startup._id}/advisor`}>
+                  <button className="btn btn-secondary">View Full AI Analysis</button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <p className="muted" style={{ marginBottom: '16px' }}>No AI evaluation generated yet. Provide startup details to get insights.</p>
+                <Link to={`/startup/${startup._id}/advisor`}>
+                  <button className="btn btn-primary">Get AI Analysis</button>
+                </Link>
+              </>
+            )}
+          </div>
+        )}
 
         {isStartupOwner && (
           <div className="card clickable-card" style={{ marginBottom: "24px" }}>

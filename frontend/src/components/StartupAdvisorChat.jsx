@@ -3,9 +3,7 @@ import API from '../services/api';
 import './StartupAdvisorChat.css';
 
 const StartupAdvisorChat = ({ startupId }) => {
-  const [messages, setMessages] = useState([
-    { role: 'ai', text: 'Hello! I am your AI Startup Advisor. Ask me anything about your market, revenue strategy, competitors, or how to improve your startup.' }
-  ]);
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
@@ -43,8 +41,14 @@ const StartupAdvisorChat = ({ startupId }) => {
     } catch (err) {
       let errorText = 'Sorry, I encountered an error while processing your request. Please try again later.';
       
-      if (err.response?.status === 503) {
+      if (err.response?.status === 429) {
+        errorText = 'Quota exceeded. Please try again later.';
+      } else if (err.response?.status === 503) {
         errorText = 'AI service is currently busy.\nPlease try again in a few seconds.';
+      } else if (err.response?.status >= 500) {
+        errorText = 'Server error occurred. Please try again.';
+      } else if (!err.response) {
+        errorText = 'Network error. Please check your connection.';
       } else if (err.response?.data?.message) {
         errorText = err.response.data.message;
       }
@@ -69,6 +73,12 @@ const StartupAdvisorChat = ({ startupId }) => {
       </div>
 
       <div className="chat-messages">
+        {messages.length === 0 && !loading && (
+          <div className="empty-state" style={{ textAlign: 'center', padding: '40px 20px', color: '#666' }}>
+            <h4>No messages yet</h4>
+            <p>Start a conversation with your AI Advisor by asking a question or choosing a suggestion below.</p>
+          </div>
+        )}
         {messages.map((msg, idx) => (
           <div key={idx} className={`message message-${msg.role}`}>
             <div className="message-text">

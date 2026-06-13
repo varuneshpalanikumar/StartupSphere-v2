@@ -89,7 +89,17 @@ const StartupAssessmentForm = ({ startupId, onEvaluationSuccess }) => {
         onEvaluationSuccess();
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to generate evaluation. Ensure all required fields are filled.');
+      if (err.response?.status === 429) {
+        setError('Quota exceeded. Please try again later.');
+      } else if (err.response?.status === 503) {
+        setError('AI service is currently unavailable. Please try again later.');
+      } else if (err.response?.status >= 500) {
+        setError('Server error occurred. Please try again.');
+      } else if (!err.response) {
+        setError('Network error. Please check your connection.');
+      } else {
+        setError(err.response?.data?.message || 'Failed to generate evaluation. Ensure all required fields are filled.');
+      }
     } finally {
       setEvaluating(false);
     }
