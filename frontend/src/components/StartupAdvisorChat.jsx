@@ -41,7 +41,15 @@ const StartupAdvisorChat = ({ startupId }) => {
         setMessages((prev) => [...prev, aiMessage]);
       }
     } catch (err) {
-      const errorMessage = { role: 'ai', text: 'Sorry, I encountered an error while processing your request. Please try again later.' };
+      let errorText = 'Sorry, I encountered an error while processing your request. Please try again later.';
+      
+      if (err.response?.status === 503) {
+        errorText = 'AI service is currently busy.\nPlease try again in a few seconds.';
+      } else if (err.response?.data?.message) {
+        errorText = err.response.data.message;
+      }
+
+      const errorMessage = { role: 'ai', text: errorText };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setLoading(false);

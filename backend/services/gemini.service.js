@@ -13,7 +13,7 @@ class GeminiService {
   initGemini() {
     if (process.env.GEMINI_API_KEY) {
       this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-      this.model = this.genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+      this.model = this.genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
     } else {
       console.warn("GEMINI_API_KEY is not set in environment variables.");
     }
@@ -114,13 +114,24 @@ Keep answer under 3 paragraphs.
 Founder's Question: ${question}
 `;
 
-    try {
-      const result = await this.model.generateContent(prompt);
-      return result.response.text();
-    } catch (error) {
-      console.error("GeminiService generateAdvice Error:", error);
-      throw new Error("Failed to generate AI advice.");
+    let attempts = 3;
+
+    while (attempts > 0) {
+      try {
+        const result = await this.model.generateContent(prompt);
+        return result.response.text();
+      } catch (error) {
+        if (error.status === 503) {
+          attempts--;
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          continue;
+        }
+        console.error("GeminiService generateAdvice Error:", error);
+        throw error;
+      }
     }
+
+    throw new Error("AI service temporarily unavailable");
   }
 }
 
