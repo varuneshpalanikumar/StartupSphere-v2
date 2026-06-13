@@ -16,7 +16,7 @@ exports.searchUsers = async (req, res, next) => {
     }
 
     if (skill) {
-      filter.skills = { $in: [skill] };
+      filter.skills = { $regex: skill, $options: "i" };
     }
 
     if (name) {

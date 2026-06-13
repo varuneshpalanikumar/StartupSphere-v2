@@ -20,7 +20,7 @@ function FounderStartups() {
 
       const res = await API.get(`/startups/founder/${user._id}`);
 
-      setStartups(res.data);
+      setStartups(res.data.data || res.data);
 
     } catch (error) {
 

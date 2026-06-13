@@ -18,7 +18,7 @@ function MentorStartups() {
   const fetchMentorStartups = async () => {
     try {
       const res = await API.get(`/startups/mentor/${user._id}`);
-      setStartups(res.data);
+      setStartups(res.data.data || res.data);
       setIsError(false);
       setMessage("");
     } catch (error) {

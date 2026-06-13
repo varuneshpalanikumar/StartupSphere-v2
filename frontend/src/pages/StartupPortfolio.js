@@ -69,8 +69,8 @@ function StartupPortfolio() {
       setData(res.data);
 
       setProgressForm({
-        progress: res.data.startup.progress || "",
-        latestUpdate: res.data.startup.latestUpdate || ""
+        progress: "",
+        latestUpdate: ""
       });
     } catch (error) {
       console.error(error);
@@ -162,7 +162,7 @@ function StartupPortfolio() {
       await API.get(`/startups/score/${id}`);
       fetchStartupDetails();
 
-      setSuccessMsg("Startup progress updated successfully 🚀");
+      setSuccessMsg("Startup progress updated successfully");
       setTimeout(() => {
         setSuccessMsg("");
       }, 2000);
@@ -224,7 +224,9 @@ function StartupPortfolio() {
     return <div className="page-container">Loading startup portfolio...</div>;
   }
 
-  const { startup, reviews, investorCount, teamSize } = data;
+  const { startup, reviews } = data;
+  const investorCount = startup.investorsInterested?.length || 0;
+  const teamSize = (startup.professionalsJoined?.length || 0) + 1; // +1 includes the founder
   const professionalAlreadyJoined =
   user?.role === "professional" &&
   startup.professionalsJoined?.some(

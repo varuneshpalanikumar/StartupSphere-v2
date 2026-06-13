@@ -58,7 +58,7 @@ function SearchUsers() {
       if (customFilters.name) params.append("name", customFilters.name);
 
       const res = await API.get(`/users/search?${params.toString()}`);
-      setUsers(res.data);
+      setUsers(res.data.data || res.data);
     } catch (error) {
       console.error(error);
       showMessage("Failed to search users", true);
@@ -70,7 +70,7 @@ function SearchUsers() {
 
     try {
       const res = await API.get(`/startups/founder/${loggedInUser._id}`);
-      setFounderStartups(res.data);
+      setFounderStartups(res.data.data || res.data);
     } catch (error) {
       console.error(error);
       showMessage("Failed to fetch your startups", true);
@@ -241,10 +241,10 @@ function SearchUsers() {
               user={user}
               onClick={setSelectedUser}
               showMentorActions={
-                loggedInUser?.role === "founder" && filters.role === "mentor"
+                loggedInUser?.role === "founder" && user.role === "mentor"
               }
               showInvestorActions={
-                loggedInUser?.role === "founder" && filters.role === "investor"
+                loggedInUser?.role === "founder" && user.role === "investor"
               }
               founderStartups={founderStartups}
               selectedStartupId={selectedStartupByUser[user._id] || ""}

@@ -40,7 +40,9 @@ function UserCard({
         <p>
           <strong>Portfolio:</strong>{" "}
           <a
-            href={user.portfolio}
+            href={
+              user.portfolio.startsWith("http") ? user.portfolio : `https://${user.portfolio}`
+            }
             target="_blank"
             rel="noreferrer"
             onClick={(e) => e.stopPropagation()}
@@ -84,7 +86,7 @@ function UserCard({
           >
             Request Review
           </button>
-
+          <div><br></br></div>
           <button
             className="btn btn-secondary"
             onClick={() => onSendMentorshipRequest(user._id)}

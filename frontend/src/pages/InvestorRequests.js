@@ -15,7 +15,7 @@ function InvestorRequests() {
   const fetchRequests = async () => {
     try {
       const res = await API.get(`/investor-requests/investor/${user._id}`);
-      setRequests(res.data);
+      setRequests(res.data.data || res.data);
     } catch (error) {
       console.error(error);
       setIsError(true);

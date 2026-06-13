@@ -17,7 +17,7 @@ function MyJoinRequests() {
   const fetchMyRequests = async () => {
     try {
       const res = await API.get(`/join-requests/professional/${user._id}`);
-      setRequests(res.data);
+      setRequests(res.data.data || res.data);
       setIsError(false);
       setMessage("");
     } catch (error) {

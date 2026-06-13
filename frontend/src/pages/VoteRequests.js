@@ -17,7 +17,7 @@ function VoteRequests() {
   const fetchJoinedProjects = async () => {
     try {
       const res = await API.get(`/users/${user._id}/joined-projects`);
-      setProjects(res.data);
+      setProjects(res.data.data || res.data);
     } catch (error) {
       console.error(error);
       setMessage("Failed to load joined startups");
@@ -29,7 +29,7 @@ function VoteRequests() {
       setSelectedStartup(startup);
 
       const res = await API.get(`/join-requests/startup/${startup._id}`);
-      setRequests(res.data);
+      setRequests(res.data.data || res.data);
       setMessage("");
     } catch (error) {
       console.error(error);

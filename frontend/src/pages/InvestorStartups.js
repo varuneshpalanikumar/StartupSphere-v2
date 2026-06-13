@@ -16,7 +16,7 @@ function InvestorStartups() {
     try {
 
       const res = await API.get(`/startups/investor/${user._id}`);
-      setStartups(res.data);
+      setStartups(res.data.data || res.data);
 
     } catch (error) {
       console.error(error);

@@ -19,7 +19,7 @@ function ProfessionalProjects() {
 
       const res = await API.get(`/users/${user._id}/joined-projects`);
 
-      setProjects(res.data);
+      setProjects(res.data.data || res.data);
 
     } catch (error) {
 

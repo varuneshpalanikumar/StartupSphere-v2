@@ -16,7 +16,7 @@ function MentorRequests() {
   const fetchRequests = async () => {
     try {
       const res = await API.get(`/mentor-requests/mentor/${user._id}`);
-      setRequests(res.data);
+      setRequests(res.data.data || res.data);
     } catch (error) {
       console.error(error);
     }

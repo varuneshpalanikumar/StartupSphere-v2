@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import API from "../services/api";
 import StartupCard from "../components/StartupCard";
 import Navbar from "../components/Navbar";
@@ -51,16 +51,19 @@ function SearchStartups() {
       }
 
       const res = await API.get(`/startups/search?${params.toString()}`);
-      setStartups(res.data);
+      setStartups(res.data.data || res.data);
     } catch (error) {
       console.error(error);
     }
   };
 
+  useEffect(() => {
+    searchStartups();
+  }, []);
+
   return (
     <>
   <Navbar />
-  <div className="page-container"></div>
     <div className="page-container">
       <h1 className="page-title">Explore Startups</h1>
       <p className="page-subtitle">

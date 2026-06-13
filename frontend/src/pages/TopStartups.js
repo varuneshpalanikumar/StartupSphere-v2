@@ -14,7 +14,7 @@ function TopStartups() {
     try {
       const res = await API.get("/startups/all");
 
-      const sortedStartups = [...res.data].sort(
+      const sortedStartups = [...(res.data.data || res.data)].sort(
         (a, b) => b.startupScore - a.startupScore
       );
 
