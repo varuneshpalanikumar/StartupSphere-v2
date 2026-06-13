@@ -12,6 +12,8 @@ const joinRequestRoutes = require("./routes/joinRequestRoutes");
 const userRoutes = require("./routes/userRoutes");
 const mentorRequestRoutes = require("./routes/mentorRequestRoutes");
 const investorRequestRoutes = require("./routes/investorRequestRoutes");
+const assessmentRoutes = require("./routes/assessmentRoutes");
+const aiRoutes = require("./routes/aiRoutes");
 
 
 
@@ -29,6 +31,8 @@ app.use("/api/join-requests", joinRequestRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/mentor-requests", mentorRequestRoutes);
 app.use("/api/investor-requests", investorRequestRoutes);
+app.use("/api/assessments", assessmentRoutes);
+app.use("/api/ai", aiRoutes);
 
 app.get("/", (req, res) => {
   res.send("StartupSphere API Running");

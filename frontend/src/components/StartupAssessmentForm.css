@@ -1,0 +1,126 @@
+.assessment-form-container {
+  padding: 2rem;
+  background: white;
+  border-radius: 8px;
+}
+
+.assessment-form-container h2 {
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.assessment-form-container p {
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+.assessment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #333;
+}
+
+.form-group label span {
+  color: #e53e3e;
+  margin-left: 0.25rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn-save {
+  padding: 0.75rem 1.5rem;
+  background-color: #f8f9fa;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-save:hover {
+  background-color: #e9ecef;
+}
+
+.btn-generate {
+  padding: 0.75rem 1.5rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-generate:hover {
+  background-color: #0056b3;
+}
+
+.btn-generate:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.loading-indicator {
+  margin-left: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.error-message {
+  color: #e53e3e;
+  margin-bottom: 1rem;
+  background: #fff5f5;
+  padding: 1rem;
+  border-radius: 4px;
+  border: 1px solid #fed7d7;
+}
+
+.success-message {
+  color: #38a169;
+  margin-bottom: 1rem;
+  background: #f0fff4;
+  padding: 1rem;
+  border-radius: 4px;
+  border: 1px solid #c6f6d5;
+}
+
+.optional-section-title {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  color: #4a5568;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 0.5rem;
+}

@@ -18,6 +18,7 @@ import FounderInvestorRequests from "./pages/FounderInvestorRequests";
 import MentorStartups from "./pages/MentorStartups";
 import InvestorStartups from "./pages/InvestorStartups";
 import MyJoinRequests from "./pages/MyJoinRequests";
+import StartupAdvisorPage from "./pages/StartupAdvisorPage";
 import Toast from "./components/Toast";
 import "./styles/main.css";
 
@@ -47,6 +48,7 @@ function App() {
         <Route path="/mentor-startups" element={<MentorStartups />} />
         <Route path="/investor-startups" element={<InvestorStartups />} />
         <Route path="/my-join-requests" element={<MyJoinRequests />} />
+        <Route path="/startup/:id/advisor" element={<StartupAdvisorPage />} />
       </Routes>
     </Router>
   );

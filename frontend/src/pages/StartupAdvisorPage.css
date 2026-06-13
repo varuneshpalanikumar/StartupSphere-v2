@@ -1,0 +1,65 @@
+.advisor-page-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.advisor-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.advisor-header h1 {
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.advisor-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 1rem;
+}
+
+.advisor-tab-btn {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 4px;
+}
+
+.advisor-tab-btn:hover {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.advisor-tab-btn.active {
+  background: #007bff;
+  color: white;
+}
+
+.advisor-content {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  min-height: 500px;
+}
+
+@media (max-width: 768px) {
+  .advisor-tabs {
+    flex-direction: column;
+    align-items: center;
+  }
+  .advisor-tab-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
