@@ -11,6 +11,7 @@ function MentorRequests() {
 
   useEffect(() => {
     fetchRequests();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchRequests = async () => {
@@ -68,10 +69,6 @@ function MentorRequests() {
 
                 <p>
                   <strong>Type:</strong> {request.requestType}
-                </p>
-
-                <p>
-                  <strong>Startup Score:</strong> {request.startup?.startupScore}
                 </p>
 
                 <p>

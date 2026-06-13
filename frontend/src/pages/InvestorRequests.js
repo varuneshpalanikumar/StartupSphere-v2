@@ -10,6 +10,7 @@ function InvestorRequests() {
 
   useEffect(() => {
     fetchRequests();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchRequests = async () => {
@@ -105,10 +106,6 @@ function InvestorRequests() {
 
                 <p className="muted" style={{ marginBottom: "10px" }}>
                   Founder: {request.founder?.name}
-                </p>
-
-                <p>
-                  <strong>Startup Score:</strong> {request.startup?.startupScore || 0}
                 </p>
 
                 <p>

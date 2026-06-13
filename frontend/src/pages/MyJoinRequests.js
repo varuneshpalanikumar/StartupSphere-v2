@@ -12,6 +12,7 @@ function MyJoinRequests() {
     if (user?._id) {
       fetchMyRequests();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchMyRequests = async () => {
@@ -69,10 +70,6 @@ function MyJoinRequests() {
 
                 <p style={{ marginTop: "12px" }}>
                   <strong>Progress:</strong> {request.startup?.progress || 0}%
-                </p>
-
-                <p>
-                  <strong>Score:</strong> {request.startup?.startupScore || 0}
                 </p>
 
                 <p style={{ marginTop: "12px" }}>

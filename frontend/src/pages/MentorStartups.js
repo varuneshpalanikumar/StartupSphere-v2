@@ -13,6 +13,7 @@ function MentorStartups() {
     if (user?._id) {
       fetchMentorStartups();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchMentorStartups = async () => {
@@ -70,9 +71,6 @@ function MentorStartups() {
                   <strong>Progress:</strong> {startup.progress || 0}%
                 </p>
 
-                <p>
-                  <strong>Score:</strong> {startup.startupScore || 0}
-                </p>
                 <div style={{ marginTop: "16px" }}>
                 
                   <Link to={`/startup/${startup._id}`}>

@@ -42,6 +42,7 @@ function StartupPortfolio() {
     }
 
     fetchStartupDetails(storedUser);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const showMessage = (text, error = false) => {
@@ -285,7 +286,6 @@ function StartupPortfolio() {
 
         <div className="grid grid-3" style={{ marginBottom: "24px" }}>
           <StatCard title="Progress" value={`${startup.progress}%`} />
-          <StatCard title="Startup Score" value={startup.startupScore} />
           <StatCard title="Investors Interested" value={investorCount} />
           <StatCard title="Team Size" value={teamSize} />
           <StatCard title="Funding Required" value={`₹${startup.fundingRequired}`} />

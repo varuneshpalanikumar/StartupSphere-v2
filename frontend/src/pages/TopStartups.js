@@ -8,15 +8,22 @@ function TopStartups() {
 
   useEffect(() => {
     fetchTopStartups();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchTopStartups = async () => {
     try {
       const res = await API.get("/startups/all");
 
-      const sortedStartups = [...(res.data.data || res.data)].sort(
-        (a, b) => b.startupScore - a.startupScore
-      );
+      const sortedStartups = [...(res.data.data || res.data)].sort((a, b) => {
+        const scoreA = a.aiEvaluation?.aiScore ?? a.aiScore ?? -1;
+        const scoreB = b.aiEvaluation?.aiScore ?? b.aiScore ?? -1;
+        
+        if (scoreB === scoreA) {
+          return (b.startupScore || 0) - (a.startupScore || 0);
+        }
+        return scoreB - scoreA;
+      });
 
       setStartups(sortedStartups);
     } catch (error) {
@@ -38,7 +45,7 @@ function TopStartups() {
       <div className="page-container">
         <h1 className="page-title">Top Startups</h1>
         <p className="page-subtitle">
-          Ranked by startup score to help investors discover promising ventures.
+          Ranked by AI Score to help investors discover promising ventures.
         </p>
 
         {startups.length === 0 ? (
@@ -68,7 +75,7 @@ function TopStartups() {
                 </p>
 
                 <p>
-                  <strong>Startup Score:</strong> {startup.startupScore}
+                  <strong>AI Score:</strong> {(startup.aiEvaluation?.aiScore ?? startup.aiScore) != null ? Math.round(startup.aiEvaluation?.aiScore ?? startup.aiScore) : "Not Evaluated"}
                 </p>
 
                 <p>

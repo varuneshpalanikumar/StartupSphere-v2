@@ -10,6 +10,7 @@ function InvestorStartups() {
 
   useEffect(() => {
     fetchInvestorStartups();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchInvestorStartups = async () => {
@@ -55,10 +56,6 @@ function InvestorStartups() {
                   <strong>Progress:</strong> {startup.progress || 0}%
                 </p>
 
-                <p>
-                  <strong>Score:</strong> {startup.startupScore || 0}
-                </p>
-<br></br>
                 <Link to={`/startup/${startup._id}`}>
                   <button className="btn btn-primary">
                     View Details

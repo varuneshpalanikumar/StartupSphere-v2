@@ -21,10 +21,6 @@ function StartupCard({ startup }) {
       </p>
 
       <p>
-        <strong>Startup Score:</strong> {startup.startupScore}
-      </p>
-
-      <p>
         <strong>Funding Required:</strong> {startup.fundingRequired}
       </p>
 

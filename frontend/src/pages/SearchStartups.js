@@ -59,6 +59,7 @@ function SearchStartups() {
 
   useEffect(() => {
     searchStartups();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -119,17 +120,6 @@ function SearchStartups() {
               <option value="true">Yes</option>
               <option value="false">No</option>
             </select>
-          </div>
-
-          <div className="input-group">
-            <label>Minimum Score</label>
-            <input
-              type="number"
-              name="minScore"
-              value={filters.minScore}
-              onChange={handleChange}
-              placeholder="50"
-            />
           </div>
 
           <div className="input-group">

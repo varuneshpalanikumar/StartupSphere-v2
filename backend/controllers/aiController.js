@@ -105,6 +105,9 @@ exports.evaluateStartup = async (req, res, next) => {
       { returnDocument: "after", upsert: true, runValidators: true }
     );
 
+    // Save the AI score directly to the Startup model so global lists/leaderboards can read it
+    await Startup.findByIdAndUpdate(startupId, { $set: { aiScore: Math.round(aiScore) } }, { strict: false });
+
     res.status(200).json({
       success: true,
       data: evaluation
