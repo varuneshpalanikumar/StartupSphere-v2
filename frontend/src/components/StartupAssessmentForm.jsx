@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import API from '../services/api';
-import './StartupAssessmentForm.css';
 
 const StartupAssessmentForm = ({ startupId, onEvaluationSuccess }) => {
   const [formData, setFormData] = useState({
@@ -105,39 +104,39 @@ const StartupAssessmentForm = ({ startupId, onEvaluationSuccess }) => {
     }
   };
 
-  if (loading && !formData.problemStatement && !assessmentExists) return <div>Loading...</div>;
+  if (loading && !formData.problemStatement && !assessmentExists) return <div className="page-container">Loading...</div>;
 
   return (
-    <div className="assessment-form-container">
-      <h2>Startup Assessment</h2>
-      <p>Provide details about your startup to receive an AI-powered evaluation.</p>
+    <div className="card">
+      <h2 className="section-title">Startup Assessment</h2>
+      <p className="muted" style={{ marginBottom: "20px" }}>Provide details about your startup to receive an AI-powered evaluation.</p>
 
-      {error && <div className="error-message">{error}</div>}
-      {success && <div className="success-message">{success}</div>}
+      {error && <div className="alert-error">{error}</div>}
+      {success && <div className="alert-success">{success}</div>}
 
-      <form className="assessment-form" onSubmit={handleSave}>
-        <div className="form-group">
-          <label>Target Audience <span>*</span></label>
+      <form onSubmit={handleSave}>
+        <div className="input-group">
+          <label>Target Audience *</label>
           <input type="text" name="targetAudience" value={formData.targetAudience} onChange={handleChange} required />
         </div>
 
-        <div className="form-group">
-          <label>Problem Statement <span>*</span></label>
+        <div className="input-group">
+          <label>Problem Statement *</label>
           <textarea name="problemStatement" value={formData.problemStatement} onChange={handleChange} required />
         </div>
 
-        <div className="form-group">
-          <label>Current Solution <span>*</span></label>
+        <div className="input-group">
+          <label>Current Solution *</label>
           <textarea name="currentSolution" value={formData.currentSolution} onChange={handleChange} required />
         </div>
 
-        <div className="form-group">
-          <label>Differentiator <span>*</span></label>
+        <div className="input-group">
+          <label>Differentiator *</label>
           <textarea name="differentiator" value={formData.differentiator} onChange={handleChange} required />
         </div>
 
-        <div className="form-group">
-          <label>Current Stage <span>*</span></label>
+        <div className="input-group">
+          <label>Current Stage *</label>
           <select name="currentStage" value={formData.currentStage} onChange={handleChange} required>
             <option value="">Select Stage</option>
             <option value="Idea">Idea</option>
@@ -148,60 +147,60 @@ const StartupAssessmentForm = ({ startupId, onEvaluationSuccess }) => {
           </select>
         </div>
 
-        <div className="form-group">
-          <label>Revenue Model <span>*</span></label>
+        <div className="input-group">
+          <label>Revenue Model *</label>
           <input type="text" name="revenueModel" value={formData.revenueModel} onChange={handleChange} required />
         </div>
 
-        <div className="form-group">
-          <label>Market Location <span>*</span></label>
+        <div className="input-group">
+          <label>Market Location *</label>
           <input type="text" name="marketLocation" value={formData.marketLocation} onChange={handleChange} required />
         </div>
 
-        <h3 className="optional-section-title">Optional Details</h3>
+        <h3 className="section-title" style={{ marginTop: "32px", borderTop: "1px solid #eee", paddingTop: "16px" }}>Optional Details</h3>
 
-        <div className="form-group">
+        <div className="input-group">
           <label>Founder Background</label>
           <textarea name="founderBackground" value={formData.founderBackground} onChange={handleChange} />
         </div>
 
-        <div className="form-group">
+        <div className="input-group">
           <label>Industry Experience (Years)</label>
           <input type="number" name="industryExperience" value={formData.industryExperience} onChange={handleChange} />
         </div>
 
-        <div className="form-group">
+        <div className="input-group">
           <label>Competitors</label>
           <textarea name="competitors" value={formData.competitors} onChange={handleChange} />
         </div>
 
-        <div className="form-group">
+        <div className="input-group">
           <label>Customer Interviews Conducted</label>
           <input type="number" name="customerInterviews" value={formData.customerInterviews} onChange={handleChange} />
         </div>
 
-        <div className="form-group">
+        <div className="input-group">
           <label>Team Size</label>
           <input type="number" name="teamSize" value={formData.teamSize} onChange={handleChange} />
         </div>
 
-        <div className="form-group">
+        <div className="input-group">
           <label>Expected Pricing</label>
           <input type="text" name="expectedPricing" value={formData.expectedPricing} onChange={handleChange} />
         </div>
 
-        <div className="form-group">
+        <div className="input-group">
           <label>Customer Acquisition Strategy</label>
           <textarea name="customerAcquisition" value={formData.customerAcquisition} onChange={handleChange} />
         </div>
 
-        <div className="form-actions">
-          <button type="submit" className="btn-save" disabled={loading || evaluating}>
+        <div style={{ display: 'flex', gap: '16px', marginTop: '24px' }}>
+          <button type="submit" className="btn btn-primary" disabled={loading || evaluating}>
             {loading ? 'Saving...' : (assessmentExists ? 'Update Assessment' : 'Save Assessment')}
           </button>
           <button 
             type="button" 
-            className="btn-generate" 
+            className="btn btn-secondary" 
             onClick={handleGenerateEvaluation}
             disabled={loading || evaluating}
           >

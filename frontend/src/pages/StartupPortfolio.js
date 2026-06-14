@@ -384,7 +384,7 @@ function StartupPortfolio() {
                 <p style={{ marginBottom: '8px' }}><strong>Funding Readiness:</strong> {evaluation.fundingReadiness}</p>
                 <p style={{ marginBottom: '16px' }}><strong>Investment Verdict:</strong> {evaluation.investmentVerdict}</p>
                 <Link to={`/startup/${startup._id}/advisor`}>
-                  <button className="btn btn-secondary">View Full AI Analysis</button>
+                  <button className="btn btn-secondary"style={{ marginTop: '16px' }}>View Full AI Analysis</button>
                 </Link>
               </>
             ) : (

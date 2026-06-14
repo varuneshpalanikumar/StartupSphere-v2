@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import StartupAssessmentForm from '../components/StartupAssessmentForm';
 import StartupEvaluationDashboard from '../components/StartupEvaluationDashboard';
 import StartupAdvisorChat from '../components/StartupAdvisorChat';
-import './StartupAdvisorPage.css';
+import Navbar from '../components/Navbar';
 
 const StartupAdvisorPage = () => {
   const { id } = useParams();
@@ -11,53 +11,56 @@ const StartupAdvisorPage = () => {
   const [currentTab, setCurrentTab] = useState('assessment');
 
   return (
-    <div className="advisor-page-container">
-      <button 
-        className="btn btn-secondary" 
-        onClick={() => navigate(`/startup/${id}`)}
-        style={{ marginBottom: '20px' }}
-      >
-        &larr; Back to Portfolio
-      </button>
-
-      <div className="advisor-header">
-        <h1>AI Advisor Dashboard</h1>
-        <p>Get personalized insights, evaluate your startup, and chat with your AI Advisor.</p>
-      </div>
-
-      <div className="advisor-tabs">
+    <>
+      <Navbar />
+      <div className="page-container">
         <button 
-          className={`advisor-tab-btn ${currentTab === 'assessment' ? 'active' : ''}`}
-          onClick={() => setCurrentTab('assessment')}
+          className="btn btn-secondary" 
+          onClick={() => navigate(`/startup/${id}`)}
+          style={{ marginBottom: '24px' }}
         >
-          Assessment
+          &larr; Back to Portfolio
         </button>
-        <button 
-          className={`advisor-tab-btn ${currentTab === 'evaluation' ? 'active' : ''}`}
-          onClick={() => setCurrentTab('evaluation')}
-        >
-          Evaluation
-        </button>
-        <button 
-          className={`advisor-tab-btn ${currentTab === 'chat' ? 'active' : ''}`}
-          onClick={() => setCurrentTab('chat')}
-        >
-          Chat
-        </button>
-      </div>
 
-      <div className="advisor-content">
-        {currentTab === 'assessment' && (
-          <StartupAssessmentForm startupId={id} onEvaluationSuccess={() => setCurrentTab('evaluation')} />
-        )}
-        {currentTab === 'evaluation' && (
-          <StartupEvaluationDashboard startupId={id} />
-        )}
-        {currentTab === 'chat' && (
-          <StartupAdvisorChat startupId={id} />
-        )}
+        <div style={{ marginBottom: '32px' }}>
+          <h1 className="page-title">AI Advisor Dashboard</h1>
+          <p className="page-subtitle">Get personalized insights, evaluate your startup, and chat with your AI Advisor.</p>
+        </div>
+
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', borderBottom: '1px solid #eee', paddingBottom: '16px' }}>
+          <button 
+            className={`btn ${currentTab === 'assessment' ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setCurrentTab('assessment')}
+          >
+            Assessment
+          </button>
+          <button 
+            className={`btn ${currentTab === 'evaluation' ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setCurrentTab('evaluation')}
+          >
+            Evaluation
+          </button>
+          <button 
+            className={`btn ${currentTab === 'chat' ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setCurrentTab('chat')}
+          >
+            Chat
+          </button>
+        </div>
+
+        <div>
+          {currentTab === 'assessment' && (
+            <StartupAssessmentForm startupId={id} onEvaluationSuccess={() => setCurrentTab('evaluation')} />
+          )}
+          {currentTab === 'evaluation' && (
+            <StartupEvaluationDashboard startupId={id} />
+          )}
+          {currentTab === 'chat' && (
+            <StartupAdvisorChat startupId={id} />
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

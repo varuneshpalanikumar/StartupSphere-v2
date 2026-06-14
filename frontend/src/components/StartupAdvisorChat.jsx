@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import API from '../services/api';
-import './StartupAdvisorChat.css';
 
 const StartupAdvisorChat = ({ startupId }) => {
   const [messages, setMessages] = useState([]);
@@ -66,39 +65,40 @@ const StartupAdvisorChat = ({ startupId }) => {
   };
 
   return (
-    <div className="advisor-chat-container">
-      <div className="chat-header">
-        <h3>AI Advisor Chat</h3>
-        <p>Get instant advice tailored to your startup's profile and assessment.</p>
+    <div className="card">
+      <div style={{ marginBottom: '20px' }}>
+        <h3 className="section-title" style={{ marginBottom: '8px' }}>AI Advisor Chat</h3>
+        <p className="muted" style={{ margin: 0 }}>Get instant advice tailored to your startup's profile and assessment.</p>
       </div>
 
-      <div className="chat-messages">
+      <div style={{ height: '400px', overflowY: 'auto', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '16px', marginBottom: '20px', background: 'var(--surface)' }}>
         {messages.length === 0 && !loading && (
-          <div className="empty-state" style={{ textAlign: 'center', padding: '40px 20px', color: '#666' }}>
-            <h4>No messages yet</h4>
+          <div className="muted" style={{ textAlign: 'center', padding: '40px 20px' }}>
+            <h4 style={{ marginBottom: '8px', color: 'var(--text-soft)' }}>No messages yet</h4>
             <p>Start a conversation with your AI Advisor by asking a question or choosing a suggestion below.</p>
           </div>
         )}
         {messages.map((msg, idx) => (
-          <div key={idx} className={`message message-${msg.role}`}>
-            <div className="message-text">
+          <div key={idx} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start', marginBottom: '12px' }}>
+            <div style={{ maxWidth: '80%', padding: '12px 16px', borderRadius: '16px', background: msg.role === 'user' ? 'linear-gradient(135deg, var(--primary-2), var(--primary))' : 'var(--surface-2)', color: msg.role === 'user' ? 'white' : 'var(--text)', boxShadow: 'var(--shadow-sm)' }}>
               {msg.text.split('\n').map((line, i) => (
-                <p key={i}>{line}</p>
+                <p key={i} style={{ margin: 0, minHeight: '1em', lineHeight: '1.5' }}>{line}</p>
               ))}
             </div>
           </div>
         ))}
         {loading && (
-          <div className="loading-indicator">AI is thinking...</div>
+          <div className="muted" style={{ fontStyle: 'italic', marginLeft: '12px' }}>AI is thinking...</div>
         )}
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="chat-suggestions">
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '20px' }}>
         {suggestions.map((suggestion, idx) => (
           <button 
             key={idx} 
-            className="suggestion-btn"
+            className="btn btn-secondary"
+            style={{ fontSize: '0.9rem', padding: '6px 12px', borderRadius: '20px' }}
             onClick={() => handleSend(`Can you provide a ${suggestion} for my startup?`)}
             disabled={loading}
           >
@@ -107,15 +107,16 @@ const StartupAdvisorChat = ({ startupId }) => {
         ))}
       </div>
 
-      <form className="chat-input-area" onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '10px' }}>
         <input 
           type="text" 
           placeholder="Ask your AI Advisor..." 
           value={input}
           onChange={(e) => setInput(e.target.value)}
           disabled={loading}
+          style={{ flex: 1, padding: '14px 15px', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', fontSize: '1rem', background: 'var(--surface)', color: 'var(--text)' }}
         />
-        <button type="submit" className="btn-send" disabled={!input.trim() || loading}>
+        <button type="submit" className="btn btn-primary" disabled={!input.trim() || loading} style={{ padding: '0 24px' }}>
           Send
         </button>
       </form>

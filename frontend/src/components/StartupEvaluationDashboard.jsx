@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import API from '../services/api';
-import './StartupEvaluationDashboard.css';
 
 const StartupEvaluationDashboard = ({ startupId }) => {
   const [evaluation, setEvaluation] = useState(null);
@@ -59,118 +58,112 @@ const StartupEvaluationDashboard = ({ startupId }) => {
   };
 
   const getScoreColor = (score) => {
-    if (score >= 80) return 'score-green';
-    if (score >= 60) return 'score-yellow';
-    return 'score-red';
+    if (score >= 80) return 'var(--success)';
+    if (score >= 60) return 'var(--warning)';
+    return 'var(--danger)';
   };
 
-  if (loading) return <div className="loading-state">Loading evaluation...</div>;
-  if (generating) return <div className="loading-state">Generating evaluation...</div>;
-  if (error) return <div className="error-message">{error}</div>;
+  if (loading) return <div className="page-container" style={{ textAlign: 'center' }}>Loading evaluation...</div>;
+  if (generating) return <div className="page-container" style={{ textAlign: 'center' }}>Generating evaluation...</div>;
+  if (error) return <div className="alert-error">{error}</div>;
   if (!evaluation) return (
-    <div className="empty-state">
-      <h3>No Evaluation Found</h3>
-      <p>Please complete your assessment and generate an evaluation from the Assessment tab.</p>
+    <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
+      <h3 className="section-title">No Evaluation Found</h3>
+      <p className="muted">Please complete your assessment and generate an evaluation from the Assessment tab.</p>
     </div>
   );
 
   return (
-    <div className="evaluation-dashboard">
-      <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div>
+      <div className="card" style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h2>AI Evaluation Dashboard</h2>
-          <p>Comprehensive analysis of your startup's potential</p>
+          <h2 className="section-title" style={{ marginBottom: '8px' }}>AI Evaluation Dashboard</h2>
+          <p className="muted" style={{ margin: 0 }}>Comprehensive analysis of your startup's potential</p>
         </div>
         <button className="btn btn-primary" onClick={handleReevaluate} disabled={generating}>
           Re-evaluate Startup
         </button>
       </div>
 
-      <div className="score-cards">
-        <div className="score-card">
-          <h4>AI Score</h4>
-          <div className={`score-value ${getScoreColor(evaluation.aiScore)}`}>
+      <div className="grid grid-4" style={{ marginBottom: '24px' }}>
+        <div className="card" style={{ textAlign: 'center', padding: '20px' }}>
+          <h4 className="muted" style={{ marginBottom: '10px' }}>AI Score</h4>
+          <h2 style={{ fontSize: '2rem', color: getScoreColor(evaluation.aiScore) }}>
             {Math.round(evaluation.aiScore || 0)}
-          </div>
+          </h2>
         </div>
-        <div className="score-card">
-          <h4>Founder Fit</h4>
-          <div className={`score-value ${getScoreColor(evaluation.founderFitScore)}`}>
+        <div className="card" style={{ textAlign: 'center', padding: '20px' }}>
+          <h4 className="muted" style={{ marginBottom: '10px' }}>Founder Fit</h4>
+          <h2 style={{ fontSize: '2rem', color: getScoreColor(evaluation.founderFitScore) }}>
             {Math.round(evaluation.founderFitScore || 0)}
-          </div>
+          </h2>
         </div>
-        <div className="score-card">
-          <h4>Market Potential</h4>
-          <div className={`score-value ${getScoreColor(evaluation.marketPotentialScore)}`}>
+        <div className="card" style={{ textAlign: 'center', padding: '20px' }}>
+          <h4 className="muted" style={{ marginBottom: '10px' }}>Market Potential</h4>
+          <h2 style={{ fontSize: '2rem', color: getScoreColor(evaluation.marketPotentialScore) }}>
             {Math.round(evaluation.marketPotentialScore || 0)}
-          </div>
+          </h2>
         </div>
-        <div className="score-card">
-          <h4>Execution</h4>
-          <div className={`score-value ${getScoreColor(evaluation.executionScore)}`}>
+        <div className="card" style={{ textAlign: 'center', padding: '20px' }}>
+          <h4 className="muted" style={{ marginBottom: '10px' }}>Execution</h4>
+          <h2 style={{ fontSize: '2rem', color: getScoreColor(evaluation.executionScore) }}>
             {Math.round(evaluation.executionScore || 0)}
-          </div>
-        </div>
-        <div className="score-card">
-          <h4>Validation</h4>
-          <div className={`score-value ${getScoreColor(evaluation.validationScore)}`}>
-            {Math.round(evaluation.validationScore || 0)}
-          </div>
+          </h2>
         </div>
       </div>
 
-      <div className="verdict-section">
-        <h3>Investment Verdict</h3>
-        <div className="verdict-value">{evaluation.investmentVerdict}</div>
-        <p className="verdict-recommendation">{evaluation.recommendation}</p>
+      <div className="card" style={{ marginBottom: '24px', borderLeft: '4px solid var(--primary-2)' }}>
+        <h3 className="section-title">Investment Verdict</h3>
+        <p style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '12px', color: 'var(--text)' }}>{evaluation.investmentVerdict}</p>
+        <p className="muted" style={{ margin: 0, lineHeight: '1.6' }}>{evaluation.recommendation}</p>
       </div>
 
-      <div className="evaluation-grid">
-        <div className="evaluation-section">
-          <h3>Strengths</h3>
-          <ul>
-            {evaluation.strengths?.map((item, idx) => <li key={idx}>{item}</li>)}
+      <div className="grid grid-2">
+        <div className="card">
+          <h3 className="section-title">Strengths</h3>
+          <ul style={{ paddingLeft: '20px', margin: 0, color: 'var(--text-soft)', lineHeight: '1.6' }}>
+            {evaluation.strengths?.map((item, idx) => <li key={idx} style={{ marginBottom: '8px' }}>{item}</li>)}
           </ul>
         </div>
-        <div className="evaluation-section">
-          <h3>Weaknesses</h3>
-          <ul>
-            {evaluation.weaknesses?.map((item, idx) => <li key={idx}>{item}</li>)}
+        <div className="card">
+          <h3 className="section-title">Weaknesses</h3>
+          <ul style={{ paddingLeft: '20px', margin: 0, color: 'var(--text-soft)', lineHeight: '1.6' }}>
+            {evaluation.weaknesses?.map((item, idx) => <li key={idx} style={{ marginBottom: '8px' }}>{item}</li>)}
           </ul>
         </div>
-        <div className="evaluation-section">
-          <h3>Risks</h3>
-          <ul>
-            {evaluation.risks?.map((item, idx) => <li key={idx}>{item}</li>)}
+        <div className="card">
+          <h3 className="section-title">Risks</h3>
+          <ul style={{ paddingLeft: '20px', margin: 0, color: 'var(--text-soft)', lineHeight: '1.6' }}>
+            {evaluation.risks?.map((item, idx) => <li key={idx} style={{ marginBottom: '8px' }}>{item}</li>)}
           </ul>
         </div>
-        <div className="evaluation-section">
-          <h3>Competitor Threats</h3>
-          <ul>
-            {evaluation.competitorThreats?.map((item, idx) => <li key={idx}>{item}</li>)}
+        <div className="card">
+          <h3 className="section-title">Competitor Threats</h3>
+          <ul style={{ paddingLeft: '20px', margin: 0, color: 'var(--text-soft)', lineHeight: '1.6' }}>
+            {evaluation.competitorThreats?.map((item, idx) => <li key={idx} style={{ marginBottom: '8px' }}>{item}</li>)}
           </ul>
         </div>
-        <div className="evaluation-section">
-          <h3>Market Opportunities</h3>
-          <ul>
-            {evaluation.marketOpportunities?.map((item, idx) => <li key={idx}>{item}</li>)}
+        <div className="card">
+          <h3 className="section-title">Market Opportunities</h3>
+          <ul style={{ paddingLeft: '20px', margin: 0, color: 'var(--text-soft)', lineHeight: '1.6' }}>
+            {evaluation.marketOpportunities?.map((item, idx) => <li key={idx} style={{ marginBottom: '8px' }}>{item}</li>)}
           </ul>
         </div>
-        <div className="evaluation-section">
-          <h3>MVP Suggestions</h3>
-          <ul>
-            {evaluation.mvpSuggestions?.map((item, idx) => <li key={idx}>{item}</li>)}
+        <div className="card">
+          <h3 className="section-title">MVP Suggestions</h3>
+          <ul style={{ paddingLeft: '20px', margin: 0, color: 'var(--text-soft)', lineHeight: '1.6' }}>
+            {evaluation.mvpSuggestions?.map((item, idx) => <li key={idx} style={{ marginBottom: '8px' }}>{item}</li>)}
           </ul>
         </div>
-        <div className="evaluation-section">
-          <h3>Next Milestones</h3>
-          <ul>
-            {evaluation.nextMilestones?.map((item, idx) => <li key={idx}>{item}</li>)}
+        <div className="card" style={{ gridColumn: '1 / -1' }}>
+          <h3 className="section-title">Next Milestones</h3>
+          <ul style={{ paddingLeft: '20px', margin: 0, color: 'var(--text-soft)', lineHeight: '1.6' }}>
+            {evaluation.nextMilestones?.map((item, idx) => <li key={idx} style={{ marginBottom: '8px' }}>{item}</li>)}
           </ul>
         </div>
-        <div className="evaluation-section">
-          <h3>Funding Readiness</h3>
-          <p>{evaluation.fundingReadiness}</p>
+        <div className="card" style={{ gridColumn: '1 / -1' }}>
+          <h3 className="section-title">Funding Readiness</h3>
+          <p style={{ margin: 0, color: 'var(--text-soft)', lineHeight: '1.6' }}>{evaluation.fundingReadiness}</p>
         </div>
       </div>
     </div>

@@ -25,24 +25,24 @@ function StartupCard({ startup }) {
       </p>
 
       {isFounder && startup.aiEvaluation !== undefined && (
-        <div style={{ marginTop: '16px', padding: '16px', background: '#f8f9fa', borderRadius: '8px', border: '1px solid #e0e0e0' }}>
+        <div style={{ marginTop: '16px', padding: '16px', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
           {startup.aiEvaluation ? (
             <>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <strong>AI Score:</strong>
-                <span style={{ background: '#007bff', color: 'white', padding: '4px 10px', borderRadius: '12px', fontWeight: 'bold' }}>
+                <strong style={{ color: 'var(--text)' }}>AI Score:</strong>
+                <span style={{ background: 'var(--primary)', color: 'white', padding: '4px 10px', borderRadius: '12px', fontWeight: 'bold' }}>
                   {Math.round(startup.aiEvaluation.aiScore)}/100
                 </span>
               </div>
-              <p style={{ marginBottom: '4px' }}><strong>Funding Readiness:</strong> {startup.aiEvaluation.fundingReadiness}</p>
-              <p style={{ marginBottom: '12px' }}><strong>Investment Verdict:</strong> {startup.aiEvaluation.investmentVerdict}</p>
+              <p style={{ marginBottom: '4px', color: 'var(--text)' }}><strong style={{ color: 'var(--text)' }}>Funding Readiness:</strong> {startup.aiEvaluation.fundingReadiness}</p>
+              <p style={{ marginBottom: '12px', color: 'var(--text)' }}><strong style={{ color: 'var(--text)' }}>Investment Verdict:</strong> {startup.aiEvaluation.investmentVerdict}</p>
               <Link to={`/startup/${startup._id}/advisor`}>
                 <button className="btn btn-secondary" style={{ width: '100%' }}>View AI Analysis</button>
               </Link>
             </>
           ) : (
             <>
-              <p style={{ marginBottom: '12px', color: '#666' }}><strong>AI Analysis:</strong> Not yet generated</p>
+              <p className="muted" style={{ marginBottom: '12px' }}><strong>AI Analysis:</strong> Not yet generated</p>
               <Link to={`/startup/${startup._id}/advisor`}>
                 <button className="btn btn-secondary" style={{ width: '100%' }}>Get AI Analysis</button>
               </Link>
